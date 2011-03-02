@@ -1,7 +1,8 @@
 (ns viewbenchmarks.core
   (:use net.cgrand.enlive-html)
   (:require [hiccup.core :as hiccup]
-            [clj-html.core :as clj-html]))
+            [clj-html.core :as clj-html]
+            [tinsel.core :as tinsel]))
 
 (defn clj-html-benchmark []
   (let [text "Some text"]
@@ -85,28 +86,74 @@
 (defn enlive-snippet-benchmark []
   (apply str (test-template-with-snippet)))
 
+
+(tinsel/deftemplate tinsel-template
+  [[:html
+    [:head
+     [:title "Literal String"]]
+    [:body
+     [:div.example]
+     [:ul.times-table]]]]
+  [text]
+  (tinsel/tag= :div)
+  (tinsel/set-content text)
+  (tinsel/tag= :ul)
+  (tinsel/set-content (for [n (range 1 13)]
+                        [:li n " * 9 = " (* n 9)])))
+
+(defn tinsel-benchmark []
+  (tinsel-template "Some text"))
+
+(tinsel/deftemplate hint-tinsel-template
+  [[:html
+    [:head
+     [:title "Literal String"]]
+    [:body
+     [:div.example]
+     [:ul.times-table]]]]
+  [text]
+  (tinsel/tag= :div)
+  (tinsel/set-content ^String text)
+  (tinsel/tag= :ul)
+  (tinsel/set-content (for [n (range 1 13)]
+                        [:li ^Number n " * 9 = " (* ^Number n 9)])))
+
+(defn hint-tinsel-benchmark []
+  (hint-tinsel-template "Some text"))
+
+
 (defn run-benchmark [f]
   (dotimes [_ 3]
     (time (dotimes [_ 100] (f)))))
 
-;(println "clj-html")
-;(run-benchmark clj-html-benchmark)
+(println "clj-html")
+(run-benchmark clj-html-benchmark)
 
-;(println "hiccup")
-;(run-benchmark hiccup-benchmark)
+(println "hiccup")
+(run-benchmark hiccup-benchmark)
 
-;(println "hiccup (type-hint)")
-;(run-benchmark hint-hiccup-benchmark)
+(println "hiccup (type-hint)")
+(run-benchmark hint-hiccup-benchmark)
 
-;(println "str")
-;(run-benchmark str-benchmark)
+(println "str")
+(run-benchmark str-benchmark)
 
-;(println "enlive")
-;(run-benchmark enlive-benchmark)
+(println "enlive")
+(run-benchmark enlive-benchmark)
 
-;(println "enlive with snippet")
-;(run-benchmark enlive-snippet-benchmark)
+(println "enlive with snippet")
+(run-benchmark enlive-snippet-benchmark)
 
-(doseq [iters (range 0 1000 100)]
-  (println "enlive template-2" iters "iterations")
-  (run-benchmark #(enlive-benchmark-2 iters)))
+(println "tinsel")
+(run-benchmark tinsel-benchmark)
+
+(println "tinsel (type-hint)")
+(run-benchmark hint-tinsel-benchmark)
+
+(println "Are tinsel and hiccup output equal? "
+         (= (hiccup-benchmark)
+            (tinsel-benchmark)))
+
+;(doseq [iters (range 0 1000 100)]
+; (println "enlive template-2" iters "iterations")
+; (run-benchmark #(enlive-benchmark-2 iters)))
