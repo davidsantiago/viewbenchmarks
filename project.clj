@@ -5,5 +5,5 @@
                  [enlive "1.0.0-SNAPSHOT"]
                  [hiccup "0.2.1"]
                  [clj-html "0.1.0"]
-                 [tinsel "0.2.0-SNAPSHOT"]
+                 [tinsel "0.3.0"]
                  [incanter/incanter "1.0-master-SNAPSHOT"]])
